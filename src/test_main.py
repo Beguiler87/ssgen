@@ -1,5 +1,5 @@
 import unittest
-from main import extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
+from main import extract_title, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks, text_to_children, count_heading_level, markdown_to_html_node
 from textnode import TextNode, TextType
 class TestMarkdownExtraction(unittest.TestCase):
 	def test_extract_markdown_images(self):
@@ -161,5 +161,66 @@ class TestTextToTextNodes(unittest.TestCase):
 			self.assertEqual(nodes[i].text, expected[i].text)
 			self.assertEqual(nodes[i].text_type, expected[i].text_type)
 			self.assertEqual(nodes[i].url, expected[i].url)
+	def test_markdown_to_blocks(self):
+		md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+		blocks = markdown_to_blocks(md)
+		self.assertEqual(
+			blocks,
+			[
+				"This is **bolded** paragraph",
+				"This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+				"- This is a list\n- with items",
+			],
+		)
+	def test_paragraphs(self):
+		md = """
+	This is **bolded** paragraph
+	text in a p
+	tag here
+
+	This is another paragraph with _italic_ text and `code` here
+
+	"""
+
+		node = markdown_to_html_node(md)
+		html = node.to_html()
+		self.assertEqual(
+			html,
+			"<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+		)
+
+	def test_codeblock(self):
+		md = """
+	```
+	This is text that _should_ remain
+	the **same** even with inline stuff
+	```
+	"""
+
+		node = markdown_to_html_node(md)
+		html = node.to_html()
+		self.assertEqual(
+			html,
+			"<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+		)
+	def test_extract_title(self):
+		# Test basic title extraction
+		markdown = "# Hello World\nThis is some content."
+		self.assertEqual(extract_title(markdown), "Hello World")
+		# Test title with extra whitespace
+		markdown = "#    Spaced   Title    \nMore content here."
+		self.assertEqual(extract_title(markdown), "Spaced   Title")
+		# Test exception when no h1 is present
+		markdown_no_title = "## Secondary heading\nContent without h1."
+		with self.assertRaises(Exception):
+			extract_title(markdown_no_title)
 if __name__ == "__main__":
 	unittest.main()
