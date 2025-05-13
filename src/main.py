@@ -20,7 +20,7 @@ def main():
 	dir_path_content = "content"
 	template_path = "template.html"
 	dest_dir_path = "docs"
-	generate_pages_recursive(dir_path_content, template_path, dest_dir_path)
+	generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath="/")
 def extract_markdown_images(text):
 	matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 	return matches
@@ -407,7 +407,7 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, bas
 				# Ensure the parent directory exists
 				os.makedirs(os.path.dirname(destination_path), exist_ok=True)
 				# Generate the page
-				generate_page(markdown_path, template_path, destination_path)
+				generate_page(markdown_path, template_path, destination_path, basepath="/")
 def recursive_function(src, dst):
 	directory_list = os.listdir(src)
 	for directory_item in directory_list:
