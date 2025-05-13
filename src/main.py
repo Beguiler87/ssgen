@@ -385,6 +385,9 @@ def generate_page(from_path, template_path, dest_path, basepath="/"):
 	# replace placeholders
 	final_html = template_content.replace("{{ Title }}", title)
 	final_html = final_html.replace("{{ Content }}", html_content)
+	# Add these two lines to replace paths
+	final_html = final_html.replace('href="/', f'href="{basepath}')
+	final_html = final_html.replace('src="/', f'src="{basepath}')
 	# ensure directory exists
 	os.makedirs(os.path.dirname(dest_path), exist_ok=True)
 	# write the output file
